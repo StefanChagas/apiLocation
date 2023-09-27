@@ -1,4 +1,8 @@
-<script src="https://maps.googleapis.com/maps/api/js?key=API_KEY&callback=initMap" defer></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+
+<div id="map" style="width: 600px; height: 400px;"></div>
+
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 
 <script>
     if (navigator.geolocation) {
@@ -8,8 +12,8 @@
                 lat: position.coords.latitude,
                 lng: position.coords.longitude,
             };
-            res.json(userLocation);
             console.log("Localização do usuário:", userLocation);
+            console.log("Lat do usuário:", userLocation['lat']);
         },
         (error) => {
             console.error("Erro ao obter a localização:", error);
@@ -19,40 +23,25 @@
       console.error("Geolocalização não é suportada pelo navegador");
     }
 
-    function initMap() {
-        map = new google.maps.Map(document.getElementById("map"), {
-            center: { lat: -34.397, lng: 150.644 },
-            zoom: 6,
-        });
-        infoWindow = new google.maps.InfoWindow();
+    var map = L.map('map').setView([-30.0515328, -51.1705088], 12);
 
-        const locationButton = document.createElement("button");
-        locationButton.textContent = "Pan to Current Location";
-        locationButton.classList.add("custom-map-control-button");
-        map.controls[google.maps.ControlPosition.TOP_CENTER].push(locationButton);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+    }).addTo(map);
 
-        locationButton.addEventListener("click", () => {
-            if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                const pos = {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            function(position) {
+                var userLocation = {
                     lat: position.coords.latitude,
-                    lng: position.coords.longitude,
+                    lng: position.coords.longitude
                 };
-                infoWindow.setPosition(pos);
-                infoWindow.setContent("Location found.");
-                infoWindow.open(map);
-                map.setCenter(pos);
-                },
-                () => {
-                handleLocationError(true, infoWindow, map.getCenter());
-                }
-            );
-            } else {
-            handleLocationError(false, infoWindow, map.getCenter());
+                L.marker([userLocation.lat, userLocation.lng]).addTo(map)
+                    .bindPopup('Sua localização').openPopup();
+            },
+            function(error) {
+                console.error("Erro ao obter a localização:", error);
             }
-        });
+        );
     }
-
-
 </script>
